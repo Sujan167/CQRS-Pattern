@@ -1,0 +1,107 @@
+version: "3.9"
+
+services:
+  api:
+    build: .
+    container_name: cqrs_api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - write_db
+      - read_db
+      - redis
+    environment:
+      - PYTHONUNBUFFERED="1"
+      - WRITE_DB_URL=postgresql+asyncpg://postgres:postgres@write_db:5432/write_db
+      - READ_DB_URL=postgresql+asyncpg://postgres:postgres@read_db:5432/read_db
+      - REDIS_URL=redis://redis:6379/0
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  write_db:
+    image: postgres:15
+    container_name: write_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: write_db
+    ports:
+      - "5433:5432" # Host:Container
+    volumes:
+      - write_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d write_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  read_db:
+    image: postgres:15
+    container_name: read_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: read_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - read_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d read_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  worker:
+    build: .
+    container_name: cqrs_worker
+    command: celery -A app.celery_app:celery_app worker --loglevel=info
+
+    depends_on:
+      redis:
+        condition: service_started
+      write_db:
+        condition: service_healthy
+      read_db:
+        condition: service_healthy
+
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - WRITE_DB_URL=postgresql+asyncpg://postgres:postgres@write_db:5432/write_db
+      - READ_DB_URL=postgresql+asyncpg://postgres:postgres@read_db:5432/read_db
+    restart: always
+
+    volumes:
+      - .:/app
+
+  flower:
+    image: mher/flower:latest
+    container_name: cqrs_flower
+    ports:
+      - "5555:5555"
+    command: celery --broker=redis://redis:6379/0 flower
+    depends_on:
+      - redis
+
+  init-db:
+    build: .
+    command: python init_db.py
+    depends_on:
+      write_db:
+        condition: service_healthy
+      read_db:
+        condition: service_healthy
+    environment:
+      - WRITE_DB_URL=postgresql+asyncpg://postgres:postgres@write_db:5432/write_db
+      - READ_DB_URL=postgresql+asyncpg://postgres:postgres@read_db:5432/read_db
+
+volumes:
+  write_db_data:
+  read_db_data:
