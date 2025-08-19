@@ -3,21 +3,26 @@ POST http://localhost:8000/tasks
 Content-Type: application/json
 
 {
-  "title": "Dockerize CQRS",
-  "description": "Make it scalable"
+  "title": "All application flow tested2",
+  "description": "All application flow tested with new code structure2"
 }
+  # "is_completed": true
 
 ###
 GET http://localhost:8000/tasks
 
 ###
-PUT http://localhost:8000/tasks/{{task_id}}
+GET http://localhost:8000/tasks/e429fdd9-972b-44db-b6ce-95ad9e2dab6d
+
+###
+PUT http://localhost:8000/tasks/e8e1a3ef-fecd-487a-9bf8-78651193a31e
 Content-Type: application/json
 
 {
-  "title": "Dockerize CQRS Updated",
+  "title": "All application flow tested",
+  "description": "All application flow tested with new code structure updated.",
   "is_completed": true
 }
 
 ###
-DELETE http://localhost:8000/tasks/{{task_id}}
+DELETE http://localhost:8000/tasks/e429fdd9-972b-44db-b6ce-95ad9e2dab6d

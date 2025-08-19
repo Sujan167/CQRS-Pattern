@@ -74,34 +74,60 @@ flowchart LR
 - Celery 5
 - Uvicorn
 
-## Directory Structure
+## Project Structure
+
+The project follows a clean, simplified architecture with clear separation of concerns:
 
 ```
 app/
-  main.py
-  celery_app.py
-  commands/
-    create_task.py
-    update_task.py
-    delete_task.py
-  queries/
-    get_task.py
-    get_task_by_id.py
-  db/
-    models.py
-    schemas.py
-    write_db.py        # async engine + pool (writes)
-    read_db.py         # async engine + pool (reads)
-    read_db_sync.py    # sync engine for Celery worker
-  cache/
-    redis_cache.py     # async + sync APIs, per-item keys + index set
-
-docker-compose.yaml  # api, write_db, read_db, redis, worker, flower, init-db
-Dockerfile
-init_db.py           # creates tables in both DBs
-requirements.txt
-rest.http            # sample requests
+├── main.py                 # Main FastAPI application entry point
+├── celery_app.py          # Celery configuration
+├── tasks.py               # Background tasks
+├── cache/                 # Cache layer (Redis)
+│   └── redis_cache.py
+├── config/                # Configuration management
+│   └── settings.py
+├── db/                    # Database layer
+│   ├── models.py
+│   ├── schemas.py
+│   ├── write_db.py        # async engine + pool (writes)
+│   ├── read_db.py         # async engine + pool (reads)
+│   └── read_db_sync.py    # sync engine for Celery worker
+├── middleware/            # HTTP middleware
+│   └── logging_middleware.py
+├── routes/                # API routing
+│   ├── task_routes.py     # All task endpoints
+│   └── index.py           # Route collection
+└── services/              # Business logic layer
+    └── task_service.py    # All CRUD operations consolidated
 ```
+
+## Architecture Benefits
+
+### 1. **Simplified Structure**
+- **Routes**: Handle HTTP requests and responses
+- **Services**: Contain all business logic and CRUD operations
+- **Database**: Data access layer with separate read/write DBs
+- **Config**: Centralized configuration management
+
+### 2. **Consolidated CRUD Operations**
+- All task operations (create, read, update, delete) are centralized in `TaskService`
+- No complex separation between commands and queries
+- Cleaner, more maintainable code
+
+### 3. **Service Layer**
+- Business logic is centralized in the service layer
+- Easier to test and maintain
+- Reusable across different parts of the application
+
+### 4. **Middleware Support**
+- Logging middleware for request/response logging
+- Easy to add authentication, CORS, etc.
+
+### 5. **Configuration Management**
+- Centralized settings using Pydantic
+- Environment variable support
+- Easy to manage different environments (dev, staging, prod)
 
 ## Data Flow Details
 
@@ -198,6 +224,27 @@ DELETE /tasks/{task_id}
 
 You can also use `rest.http` for quick local testing.
 
+## Development
+
+### Adding New Routes
+1. Create a new route file in `/app/routes/`
+2. Add the router to `/app/routes/index.py`
+3. The route will automatically be included in the main application
+
+### Adding New Services
+1. Create a new service file in `/app/services/`
+2. Implement the business logic and CRUD operations
+3. Use the service in your routes
+
+### Adding New Middleware
+1. Create a new middleware file in `/app/middleware/`
+2. Add it to the main application in `main.py`
+
+### Configuration
+- Update `/app/config/settings.py` for new configuration options
+- Use environment variables for sensitive data
+- The `.env` file is automatically loaded
+
 ## Troubleshooting
 
 - API returns fewer tasks than expected
@@ -214,6 +261,7 @@ You can also use `rest.http` for quick local testing.
 - Write/read databases are separate for clarity; in production, these might be different clusters or replicas.
 - The read path is fully async to maximize throughput; Celery uses a sync engine to avoid async complexity in workers.
 - Connection pooling is enabled on all engines with health checks (`pool_pre_ping`).
+- The project structure has been simplified from a complex CQRS implementation to a clean, maintainable architecture while preserving all functionality.
 
 ## License
 

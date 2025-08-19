@@ -12,6 +12,7 @@ class Task(Base):
     description = Column(String)
     is_completed = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow)
 
     def __repr__(self):
         return f"<Task(id={self.id}, title={self.title}, is_completed={self.is_completed})>"
