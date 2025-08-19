@@ -182,7 +182,7 @@ The `init-db` service will create tables on both DBs at startup.
 - Create task
 
 ```http
-POST /tasks
+POST v1/tasks
 Content-Type: application/json
 
 {
@@ -194,19 +194,19 @@ Content-Type: application/json
 - List tasks
 
 ```http
-GET /tasks
+GET v1/tasks
 ```
 
 - Get task by id
 
 ```http
-GET /tasks/{task_id}
+GET v1/tasks/{task_id}
 ```
 
 - Update task
 
 ```http
-PUT /tasks/{task_id}
+PUT v1/tasks/{task_id}
 Content-Type: application/json
 
 {
@@ -219,7 +219,7 @@ Content-Type: application/json
 - Delete task
 
 ```http
-DELETE /tasks/{task_id}
+DELETE v1/tasks/{task_id}
 ```
 
 You can also use `rest.http` for quick local testing.

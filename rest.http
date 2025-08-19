@@ -1,21 +1,21 @@
 ###
-POST http://localhost:8000/tasks
+POST http://localhost:8000/v1/tasks
 Content-Type: application/json
 
 {
-  "title": "All application flow tested2",
-  "description": "All application flow tested with new code structure2"
+  "title": "All application flow tested",
+  "description": "All application flow tested with new code structure"
 }
   # "is_completed": true
 
 ###
-GET http://localhost:8000/tasks
+GET http://localhost:8000/v1/tasks
 
 ###
-GET http://localhost:8000/tasks/e429fdd9-972b-44db-b6ce-95ad9e2dab6d
+GET http://localhost:8000/v1/tasks/e429fdd9-972b-44db-b6ce-95ad9e2dab6d
 
 ###
-PUT http://localhost:8000/tasks/e8e1a3ef-fecd-487a-9bf8-78651193a31e
+PUT http://localhost:8000/v1/tasks/e8e1a3ef-fecd-487a-9bf8-78651193a31e
 Content-Type: application/json
 
 {
@@ -25,4 +25,4 @@ Content-Type: application/json
 }
 
 ###
-DELETE http://localhost:8000/tasks/e429fdd9-972b-44db-b6ce-95ad9e2dab6d
+DELETE http://localhost:8000/v1/tasks/e429fdd9-972b-44db-b6ce-95ad9e2dab6d
