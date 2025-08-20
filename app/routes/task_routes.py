@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
-@router.post("/", response_model=TaskOut)
+@router.post("/", response_model=TaskOut, status_code=201)
 async def create_task_endpoint(payload: TaskCreateRequest):
     """Create a new task"""
     return await TaskService.create_task(payload)
